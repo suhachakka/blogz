@@ -1,19 +1,27 @@
 <!doctype html>
 <html>
     <head>
-    <title>Build A Blog</title>
+    <title>Blogz</title>
     <link rel="stylesheet" type ="text/css" href ="{{url_for('static', filename= 'style.css')}}">
     </head>
     <body>
    
       <nav>
-      
-       <a href = " /blog " ><b>Main Blog Page</b></a> &NonBreakingSpace;&NonBreakingSpace;
-      <a href = " /newpost " ><b>Add a Blog Entry</b></a>
-             
-       </nav>
-       
+        
+       <a class ="page" href = "/"><b>Home</b></a> &NonBreakingSpace;
+       <a class ="main" href = " /blog " ><b>All posts</b></a> &NonBreakingSpace;&NonBreakingSpace;
+       <a class ="new" href = " /newpost " ><b>New post</b> </a>
+      <div id ="account">
+          <a href ="/login" ><b>login</b></a>&#160;
+          <a href = "/logout" ><b>logout</b></a></div></nav>
+       {% with messages = get_flashed_messages() %}
+          {% for message in messages %}
+            <div class ="error">{{message}}</div>
+          {% endfor %}
+        
+         {% endwith %}  
+
     {% block content %}
-    {% endblock %}
+    {% endblock %}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
 </body>    
 </html>

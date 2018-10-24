@@ -3,5 +3,7 @@
 <h1>{{blogs.title}}</h1>
 <p class ="content">{{blogs.body}}</p>
 
+<!----address>written by </address><a href ='{{users.username}}'>{{users.username}}</a-->
+<address>written by <a href ="./blog?user={{users.username}}">{{users.username}}</a></address> 
 
 {% endblock %}

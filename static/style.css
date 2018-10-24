@@ -6,10 +6,23 @@ h1{
     font-family:Arial, Helvetica, sans-serif; 
     color: green;
  }
+ .page{
+  display:inline-block;
+  color:brown;
+  margin-right: 155px;
+
+}
+
  
-   a{
+   .main{
+    color:brown;
+    text-align: center;
+    margin-right: 155px;
+  }
+  .new{
     display:inline-block;
     color:brown;
+    margin-right: 155px;
   }
   .error{
     color:red;
@@ -17,4 +30,19 @@ h1{
   }
   label{
       color:rgb(252, 113, 0);
+  }
+  
+  #account{
+    float: right;
+    margin-block-end: 20ch;
+  }
+  .link{
+    text-align: center;
+  }
+  
+  input[type =submit]{
+    text-size-adjust: 2px;
+  }
+  #id{
+    font-size:10px;
   }
