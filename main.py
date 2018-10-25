@@ -1,5 +1,6 @@
 from flask import Flask,request,redirect,render_template,session,flash
 from flask_sqlalchemy import SQLAlchemy
+from hashutils import make_pw_hash, check_pw_hash
 import cgi
 
 app = Flask(__name__)
@@ -29,12 +30,12 @@ class Blog(db.Model):
 class User(db.Model):  
     id =db.Column(db.Integer,primary_key=True)
     username =db.Column(db.String(50), unique=True) 
-    password =db.Column(db.String(50))
+    pw_hash =db.Column(db.String(200))
     blogs = db.relationship('Blog', backref ='owner')
 
     def __init__(self,username,password):
         self.username = username
-        self.password = password 
+        self.pw_hash = make_pw_hash(password) 
     def __repr__(self):
         return '<User %r>' % self.username    
 
@@ -54,21 +55,17 @@ def login():
             flash('Invalid Username')
         if password =='':
             flash('Invalid Password') 
-        if username != '' or password != '':       
-  
-            user = User.query.filter_by(username=username).first()
-            if user == None:
-                flash('Username doesnot exists')
-
-        #print("$$$$"+user.username)
-
-            if user and user.password == password:
-                flash('User Logged in')
-                session['username'] = username
-                return redirect('/newpost')
-            else:    
-                flash('username and password invalid')
-                return redirect('/login')          
+        user = User.query.filter_by(username=username).first()
+        #if user == None:
+            #flash('Username doesnot exists')
+        #if user and user.password == password:        
+        if user and check_pw_hash(password, user.pw_hash):
+            session['username'] = username
+            flash('User Logged in')
+            return redirect('/newpost')
+        else:
+            flash('User doesnot exists')  
+                       
     return render_template('login.html') 
 @app.route('/signup', methods=['GET','POST']) 
 def sign_up():
@@ -93,17 +90,16 @@ def sign_up():
         if  v_pass != password or password == '' :
             vps_error= 'password didn\'t match'
         if not us_error and not ps_error and not vps_error:
-         
-           existing_user = User.query.filter_by(username=username).first()
-           if not existing_user:
-               new_user = User(username,password)
-               db.session.add(new_user)
-               db.session.commit()
-               session['username'] = username
-               return redirect('/newpost')
-           else:
+        
+            existing_user = User.query.filter_by(username=username).first()
+            if not existing_user:
+                new_user = User(username,password)
+                db.session.add(new_user)
+                db.session.commit()
+                session['username'] = username
+                return redirect('/newpost')
+            else:
                 flash('A user with that Username already exists') 
-                return redirect('/signup')   
     return render_template('signup.html',us_error=us_error,ps_error=ps_error,vps_error=vps_error)
 
 @app.route('/logout')
@@ -130,36 +126,32 @@ def newpost():
         #print("$$"+str(new_blog.id))
         return redirect('/blog?id='+str(new_blog.id) )       
     else:        
-        return render_template('Addblogentry.html',title=title,body=body,t_error=t_error,b_error=b_error,owner=owner)
+        return render_template('Addblogentry.html',title=title,body=body,t_error=t_error,b_error=b_error)
 
 @app.route('/blog')
 def blogpost():
     if request.args.get('id') != None:
         indiv_id = request.args.get('id')
         #print("$$$$$"+indiv_id)
-        blogs = Blog.query.get(indiv_id)
-        user_id= request.args.get('id')
-        users =User.query.get(user_id)
-        return render_template('Individualentrypage.html',blogs=blogs,users=users)
+        blog = Blog.query.get(indiv_id)
+        print("$$$$$"+str(blog))
+        user=User.query.get(blog.owner_id)
+        print("$$$$$"+str(user))
+
+        return render_template('Individualentrypage.html',blog=blog,user=user)
+
     if request.args.get('user') != None:
         user_name= request.args.get('user')
-        print("####$"+ user_name)
-        #user =User.query.get(user_name)
+        #print("####$"+ user_name)
         user = User.query.filter_by(username=user_name).first()
-
         #print("####$"+ str(user.id))
-
         blogs =Blog.query.filter_by(owner_id=user.id).all()
-
         return render_template('singleuser.html',user=user,blogs=blogs)
-    if request.args.get('id') == None:
-        
-        #blogs = Blog.query.all()
 
+    if request.args.get('id') == None:
+        #blogs = Blog.query.all()
         blogs= Blog.query.order_by(Blog.id).all() #sorting the order
         users=User.query.all()
-
- 
         return render_template('Mainblogpage.html',blogs=blogs,users=users)
         
 @app.route('/')  
@@ -169,6 +161,7 @@ def index():
         user =User.query.get(user_name)
         blogs =Blog.query.get('user.id')
         return render_template('singleuser.html',user=user,blogs=blogs) 
+   
     if request.args.get('id') == None:
         users=User.query.all()
 
